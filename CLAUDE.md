@@ -41,6 +41,10 @@ Library docs are cached in `docs/` — consult these FIRST before making Context
 - `docs/react-native-screens.md` — React Native Screens ~4.23.0 (native stack, headers)
 - `docs/react-native-safe-area-context.md` — Safe Area v5.6.2 (provider, insets, SafeAreaView)
 - `docs/tailwindcss.md` — Tailwind CSS v3.4 utility classes reference
+- `docs/tanstack-react-query.md` — TanStack React Query ^5.90.x (useQuery, useMutation, persistence, MMKV integration)
+- `docs/react-native-mmkv.md` — MMKV ^4.2.0 (fast key-value storage, hooks, encryption, TanStack Query persister)
+- `docs/i18next.md` — i18next ^25.8.x + react-i18next ^16.5.x (useTranslation, plurals, namespaces, RN setup)
+- `docs/react-native-nitro-modules.md` — Nitro Modules ^0.35.0 (HybridObject, specs, Swift/Kotlin, codegen)
 
 Only use Context7 MCP when the user explicitly asks to fetch updated documentation or when the local docs don't cover the needed topic.
 
@@ -49,6 +53,8 @@ Only use Context7 MCP when the user explicitly asks to fetch updated documentati
 Best-practice guides in `skills/`. Consult the relevant `SKILL.md` when the task matches:
 
 - `skills/animations/` — Reanimated 4 animation patterns: CSS transitions vs CSS animations vs shared values, animating text, layout animations, performance tuning, 120fps, feature flags. Trigger on any animation-related task.
+- `skills/data-fetching/` — TanStack Query v5 + MMKV: QueryClient setup with persistence, query key conventions, mutation patterns, optimistic updates, offline support. Trigger on data fetching, API calls, caching.
+- `skills/i18n/` — i18next + react-i18next: project setup, translation file structure, namespace conventions, TypeScript type-safe keys, language switching with MMKV. Trigger on translations, i18n, user-facing text.
 
 ### Expo Plugin Skills (installed via `/plugin`)
 
