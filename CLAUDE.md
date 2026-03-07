@@ -1,0 +1,66 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Fit Tracker is a gym/fitness tracking mobile app built with Expo (SDK 55), React Native, and TypeScript.
+
+## Commands
+
+- **Start dev server:** `pnpm start` (or `pnpm expo start`)
+- **Run on platform:** `pnpm ios`, `pnpm android`, `pnpm web`
+- **Install dependencies:** `pnpm install`
+
+There are no test or lint scripts configured yet.
+
+## Architecture
+
+**Expo Router** with file-based routing in `app/`. The root layout (`app/_layout.tsx`) wraps everything in a React Navigation `ThemeProvider` with dark/light mode support.
+
+- `app/(tabs)/` - Tab navigator screens (currently two placeholder tabs + modal)
+- `app/global.css` - Tailwind CSS entry point
+- `core/constants/` - Shared constants (e.g., `Colors.ts` for theme colors)
+- `components/` - Reusable UI components, including themed `Text`/`View` wrappers with automatic light/dark color support
+
+**Styling:** NativeWind v4 (Tailwind CSS for React Native). Configured via `tailwind.config.js` with the `nativewind/preset`. Metro config wraps with `withNativeWind`. Babel config includes `nativewind/babel` preset. Prefer Tailwind classes via `className` over `StyleSheet.create`.
+
+**Path aliases:** `@/*` maps to the project root (configured in `tsconfig.json`).
+
+**TypeScript:** Strict mode enabled. Typed routes enabled via `experiments.typedRoutes` in `app.json`.
+
+## Local Documentation
+
+Library docs are cached in `docs/` — consult these FIRST before making Context7 API calls:
+
+- `docs/expo-router.md` — Expo Router ~55.0.4 (routing, navigation, Link, useRouter, tabs, layouts)
+- `docs/nativewind.md` — NativeWind v4 (className, dark mode, cssInterop, themes)
+- `docs/react-native.md` — React Native 0.83.x (core components, APIs, New Architecture)
+- `docs/expo-sdk.md` — Expo SDK 55 (splash screen, font, constants, EAS build config)
+- `docs/react-native-reanimated.md` — Reanimated 4.2.1 (animations, shared values, layout animations, gestures)
+- `docs/react-native-screens.md` — React Native Screens ~4.23.0 (native stack, headers)
+- `docs/react-native-safe-area-context.md` — Safe Area v5.6.2 (provider, insets, SafeAreaView)
+- `docs/tailwindcss.md` — Tailwind CSS v3.4 utility classes reference
+
+Only use Context7 MCP when the user explicitly asks to fetch updated documentation or when the local docs don't cover the needed topic.
+
+## Skills
+
+Best-practice guides in `skills/`. Consult the relevant `SKILL.md` when the task matches:
+
+- `skills/animations/` — Reanimated 4 animation patterns: CSS transitions vs CSS animations vs shared values, animating text, layout animations, performance tuning, 120fps, feature flags. Trigger on any animation-related task.
+
+### Expo Plugin Skills (installed via `/plugin`)
+
+These are available as auto-triggered plugins — no local files needed:
+
+- **building-native-ui** — UI components, navigation, styling, animations, and native tabs with Expo Router
+- **native-data-fetching** — fetch, React Query, SWR, caching, offline support, Expo Router data loaders
+- **expo-tailwind-setup** — Tailwind CSS v4 / NativeWind v5 setup
+- **use-dom** — DOM components for incremental web-to-native migration
+- **expo-api-routes** — API routes with Expo Router + EAS Hosting
+- **expo-dev-client** — Build and distribute development clients
+- **expo-ui-swift-ui** / **expo-ui-jetpack-compose** — Platform-native UI components
+- **upgrading-expo** — Expo SDK version upgrades and dependency fixes
+- **expo-deployment** — Deploy to App Store, Play Store, web
+- **expo-cicd-workflows** — EAS workflow YAML files for CI/CD
