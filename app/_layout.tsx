@@ -1,19 +1,25 @@
 import { useColorScheme } from "@/components/useColorScheme";
-import Colors from "@/core/constants/Colors";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { ClerkProvider } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Tabs } from "expo-router";
+import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import "./global.css";
 
 export { ErrorBoundary } from "expo-router";
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+if (!publishableKey) {
+  throw new Error("Add your Clerk Publishable Key to the .env file");
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -44,7 +50,9 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Tabs
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <Slot />
+        {/* <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme].tint,
           headerShown: false,
@@ -81,7 +89,8 @@ function RootLayoutNav() {
           name="+not-found"
           options={{ href: null }}
         />
-      </Tabs>
+      </Tabs> */}
+      </ClerkProvider>
     </ThemeProvider>
   );
 }
