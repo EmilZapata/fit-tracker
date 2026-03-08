@@ -1,18 +1,6 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
 Fit Tracker is a gym/fitness tracking mobile app built with Expo (SDK 55), React Native, and TypeScript.
-
-## Commands
-
-- **Start dev server:** `pnpm start` (or `pnpm expo start`)
-- **Run on platform:** `pnpm ios`, `pnpm android`, `pnpm web`
-- **Install dependencies:** `pnpm install`
-
-There are no test or lint scripts configured yet.
 
 ## Architecture
 
@@ -70,3 +58,7 @@ These are available as auto-triggered plugins — no local files needed:
 - **upgrading-expo** — Expo SDK version upgrades and dependency fixes
 - **expo-deployment** — Deploy to App Store, Play Store, web
 - **expo-cicd-workflows** — EAS workflow YAML files for CI/CD
+
+## Naming of new files
+
+When you create a new file, you need to use kebab-case. Example: mi-file.tsx, react-native.md
