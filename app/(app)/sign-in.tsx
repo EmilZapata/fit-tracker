@@ -1,7 +1,9 @@
 import { useSignIn } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Href, Link, useRouter } from "expo-router";
 import React from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,19 +16,34 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import GoogleSignIn from "@/components/google-sign-in";
+import {
+  signInSchema,
+  type SignInFormData,
+} from "@/modules/auth/sign-in/toolbox/schemas";
+
 export default function Page() {
   const { signIn, errors, fetchStatus } = useSignIn();
   const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = React.useState("");
-  const [password, setPassword] = React.useState("");
   const [code, setCode] = React.useState("");
-  const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleSubmit = async () => {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors: formErrors, isSubmitting },
+  } = useForm<SignInFormData>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (data: SignInFormData) => {
     const { error } = await signIn.password({
-      emailAddress,
-      password,
+      emailAddress: data.email,
+      password: data.password,
     });
     if (error) {
       console.error(JSON.stringify(error, null, 2));
@@ -141,101 +158,156 @@ export default function Page() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        {/* Header section */}
-        <View className="flex-1 justify-center">
-          {/* Logo/Branding */}
-          <View className="items-center mb-8">
-            <View className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl items-center justify-center mb-4 shadow-lg">
-              <Ionicons name="fitness" size={40} color="white" />
-            </View>
-            <Text className="text-3xl font-bold text-gray-900 mb-2">
-              FitTracker
-            </Text>
-            <Text className="text-lg text-gray-600 text-center">
-              Track your fitness journey{"\n"} and reach your goals
-            </Text>
-          </View>
-        </View>
-
-        {/* Sign in form */}
-        <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-          <Text className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            Welcome Back
-          </Text>
-
-          {/* Email Input */}
-          <View className="mb-4 flex flex-col gap-2">
-            <Text style={styles.label}>Email</Text>
-            <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200">
-              <Ionicons name="mail-outline" size={20} color="#5B7280" />
-              <TextInput
-                autoCapitalize="none"
-                value={emailAddress}
-                placeholder="Enter your email"
-                placeholderTextColor="#9CA3AF"
-                onChangeText={setEmailAddress}
-                className="flex-1 ml-3 text-gray-900"
-                editable={!isLoading}
-              />
-            </View>
-          </View>
-
-          {/* Password Input */}
-          <View className="mb-6 flex flex-col gap-2">
-            <Text style={styles.label}>Password</Text>
-            <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200">
-              <Ionicons name="lock-closed-outline" size={20} color="#5B7280" />
-              <TextInput
-                autoCapitalize="none"
-                value={password}
-                placeholder="Enter your password"
-                placeholderTextColor="#9CA3AF"
-                onChangeText={setPassword}
-                className="flex-1 ml-3 text-gray-900"
-                editable={!isLoading}
-                secureTextEntry={true}
-              />
-            </View>
-          </View>
-
-          {errors.fields.identifier && (
-            <Text style={styles.error}>{errors.fields.identifier.message}</Text>
-          )}
-
-          {errors.fields.password && (
-            <Text style={styles.error}>{errors.fields.password.message}</Text>
-          )}
-
-          {/* Sign in button */}
-          <TouchableOpacity
-            onPress={handleSubmit}
-            disabled={!emailAddress || !password || isLoading}
-            className={`rounded-xl py-4 shadow-sm mb-4 ${isLoading ? "bg-gray-400" : "bg-blue-600"}`}
-            activeOpacity={0.5}
-          >
-            <View className="flex-row items-center justify-center">
-              {isLoading ? (
-                <Ionicons name="refresh" size={20} color="white" />
-              ) : (
-                <Ionicons name="log-in-outline" size={20} color="white" />
-              )}
-              <Text className="text-white font-semibold text-lg ml-2">
-                {isLoading ? "Signing in..." : "Sign In"}
+        <View className="flex-1 px-6">
+          {/* Header section */}
+          <View className="flex-1 justify-center">
+            {/* Logo/Branding */}
+            <View className="items-center mb-8">
+              <View className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl items-center justify-center mb-4 shadow-lg">
+                <Ionicons name="fitness" size={40} color="white" />
+              </View>
+              <Text className="text-3xl font-bold text-gray-900 mb-2">
+                FitTracker
+              </Text>
+              <Text className="text-lg text-gray-600 text-center">
+                Track your fitness journey{"\n"} and reach your goals
               </Text>
             </View>
-          </TouchableOpacity>
 
-          {/* For your debugging purposes. You can just console.log errors, but we put them in the UI for convenience */}
-          {/* {errors && (
+            {/* Sign in form */}
+            <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+              <Text className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Welcome Back
+              </Text>
+
+              {/* Email Input */}
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View className="mb-4 flex flex-col gap-2">
+                    <Text style={styles.label}>Email</Text>
+                    <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200">
+                      <Ionicons name="mail-outline" size={20} color="#5B7280" />
+                      <TextInput
+                        autoCapitalize="none"
+                        value={value}
+                        placeholder="Enter your email"
+                        placeholderTextColor="#9CA3AF"
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        className="flex-1 ml-3 text-gray-900"
+                        editable={!isSubmitting}
+                        inputMode="email"
+                      />
+                    </View>
+                    {formErrors.email && (
+                      <Text style={styles.error}>
+                        {formErrors.email.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+
+              {/* Password Input */}
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View className="mb-6 flex flex-col gap-2">
+                    <Text style={styles.label}>Password</Text>
+                    <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200">
+                      <Ionicons
+                        name="lock-closed-outline"
+                        size={20}
+                        color="#5B7280"
+                      />
+                      <TextInput
+                        autoCapitalize="none"
+                        value={value}
+                        placeholder="Enter your password"
+                        placeholderTextColor="#9CA3AF"
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        className="flex-1 ml-3 text-gray-900"
+                        editable={!isSubmitting}
+                        secureTextEntry={true}
+                        inputMode="text"
+                      />
+                    </View>
+                    {formErrors.password && (
+                      <Text style={styles.error}>
+                        {formErrors.password.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+
+              {errors.fields.identifier && (
+                <Text style={styles.error}>
+                  {errors.fields.identifier.message}
+                </Text>
+              )}
+
+              {errors.fields.password && (
+                <Text style={styles.error}>
+                  {errors.fields.password.message}
+                </Text>
+              )}
+
+              {/* Sign in button */}
+              <TouchableOpacity
+                onPress={handleSubmit(onSubmit)}
+                disabled={isSubmitting}
+                className={`rounded-xl py-4 shadow-sm mb-4 ${isSubmitting ? "bg-gray-400" : "bg-blue-600"}`}
+                activeOpacity={0.8}
+              >
+                <View className="flex-row items-center justify-center">
+                  {isSubmitting ? (
+                    <Ionicons name="refresh" size={20} color="white" />
+                  ) : (
+                    <Ionicons name="log-in-outline" size={20} color="white" />
+                  )}
+                  <Text className="text-white font-semibold text-lg ml-2">
+                    {isSubmitting ? "Signing in..." : "Sign In"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* For your debugging purposes. You can just console.log errors, but we put them in the UI for convenience */}
+              {/* {errors && (
             <Text style={styles.debug}>{JSON.stringify(errors, null, 2)}</Text>
           )} */}
-        </View>
 
-        <View style={styles.linkContainer}>
-          <Text>Don't have an account? </Text>
-          <Link href="/sign-up">
-            <Text>Sign up</Text>
-          </Link>
+              {/* Divider */}
+              <View className="flex-row items-center my-4 ">
+                <View className="flex-1 h-px bg-gray-200" />
+                <Text className="px-4 text-sm text-gray-500">or</Text>
+                <View className="flex-1 h-px bg-gray-200" />
+              </View>
+              {/* Google Sign In */}
+              <GoogleSignIn />
+            </View>
+
+            {/* Sign up link */}
+            <View className="flex-row justify-center items-center">
+              <Text className="text-gray-600">Don't have an account? </Text>
+              <Link href="/sign-up" asChild>
+                <TouchableOpacity>
+                  <Text className="text-blue-600 font-semibold">Sign up</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+          </View>
+
+          {/* Footer section */}
+          <View className="pb-6">
+            <Text className="text-center text-gray-500 text-sm">
+              Start your fitness journey today.
+            </Text>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
