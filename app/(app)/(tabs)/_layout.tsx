@@ -15,15 +15,37 @@ export default function Layout() {
           ),
         }}
       />
+
       <Tabs.Screen
-        name="profile"
+        name="exercises"
         options={{
-          title: "Profile",
+          title: "Exercises",
           tabBarIcon: ({ color, size }) => (
-            <AntDesign name="user" color={color} size={size} />
+            <AntDesign name="book" color={color} size={size} />
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="workout"
+        options={{
+          title: "workout",
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="plus-circle" color={color} size={size} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="active-workout"
+        options={{
+          title: "Active workout",
+          headerShown: false,
+          href: null,
+          tabBarStyle: { display: "none" },
+        }}
+      />
+
       <Tabs.Screen
         name="history"
         options={{
@@ -32,6 +54,24 @@ export default function Layout() {
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="clock-circle" color={color} size={size} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          headerShown: false,
+          // tabBarIcon: ({ color, size }) => (
+          //   <Image
+          //   source={{
+          //     uri: user?.imageUrl ?? user?.externalAccounts[0]?.imageUrl
+          //   }}
+          //   className="rounded-full"
+          //     style={{ width: 28, height: 28, borderRadius: 100 }}
+          //   />
+          //   // <AntDesign name="user" color={color} size={size} />
+
+          // ),
         }}
       />
     </Tabs>
