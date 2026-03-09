@@ -29,7 +29,7 @@ export default function Layout() {
       <Tabs.Screen
         name="workout"
         options={{
-          title: "workout",
+          title: "Workout",
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="plus-circle" color={color} size={size} />
           ),

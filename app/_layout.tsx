@@ -52,44 +52,6 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
         <Slot />
-        {/* <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme].tint,
-          headerShown: false,
-        }}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: "Home",
-            tabBarIcon: ({ color, size }) => (
-              <AntDesign name="home" color={color} size={size} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: "Profile",
-            tabBarIcon: ({ color, size }) => (
-              <AntDesign name="user" color={color} size={size} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="history"
-          options={{
-            title: "History",
-            tabBarIcon: ({ color, size }) => (
-              <AntDesign name="clock-circle" color={color} size={size} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="+not-found"
-          options={{ href: null }}
-        />
-      </Tabs> */}
       </ClerkProvider>
     </ThemeProvider>
   );
