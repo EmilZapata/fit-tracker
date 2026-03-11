@@ -217,7 +217,7 @@ export default function Page() {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View className="mb-6 flex flex-col gap-2">
                     <Text style={styles.label}>Password</Text>
-                    <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200">
+                    <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-2  border border-gray-200">
                       <Ionicons
                         name="lock-closed-outline"
                         size={20}

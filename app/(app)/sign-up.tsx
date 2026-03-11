@@ -1,7 +1,23 @@
+import {
+  SignUpFormData,
+  signUpSchema,
+} from "@/modules/auth/sign-up/toolbox/schemas";
 import { useAuth, useSignUp } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Href, Link, useRouter } from "expo-router";
 import React from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Page() {
@@ -9,15 +25,26 @@ export default function Page() {
   const { isSignedIn } = useAuth();
   const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = React.useState("");
-  const [password, setPassword] = React.useState("");
   const [code, setCode] = React.useState("");
 
-  const handleSubmit = async () => {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors: formErrors, isSubmitting },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (data: SignUpFormData) => {
     const { error } = await signUp.password({
-      emailAddress,
-      password,
+      emailAddress: data.email,
+      password: data.password,
     });
+    console.log("🚀 ~ onSubmit ~ error:", error);
     if (error) {
       console.error(JSON.stringify(error, null, 2));
       return;
@@ -27,9 +54,10 @@ export default function Page() {
   };
 
   const handleVerify = async () => {
-    await signUp.verifications.verifyEmailCode({
+    const { error } = await signUp.verifications.verifyEmailCode({
       code,
     });
+
     if (signUp.status === "complete") {
       await signUp.finalize({
         // Redirect the user to the home page after signing up
@@ -50,8 +78,33 @@ export default function Page() {
         },
       });
     } else {
-      // Check why the sign-up is not complete
-      console.error("Sign-up attempt not complete:", signUp);
+      const errorCode = (error as any)?.errors?.[0]?.code;
+      console.error("🚀 ~ handleVerify ~ errorCode:", errorCode);
+      if (errorCode === "verification_expired") {
+        await signUp.verifications.sendEmailCode();
+
+        Alert.alert(
+          "Code Expired",
+          "Your verification code has expired. We've sent you a new code, please check your email.",
+          [{ text: "OK" }],
+        );
+        return;
+      }
+
+      if (errorCode === "form_code_incorrect") {
+        Alert.alert(
+          "Incorrect Code",
+          "The verification code you entered is incorrect. Please try again.",
+          [{ text: "OK" }],
+        );
+        return;
+      }
+
+      Alert.alert(
+        "Verification Failed",
+        "There was an issue verifying your account. Please try again or contact support if the problem persists.",
+        [{ text: "OK" }],
+      );
     }
   };
 
@@ -65,97 +118,248 @@ export default function Page() {
     signUp.missingFields.length === 0
   ) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Verify your account</Text>
-        <TextInput
-          style={styles.input}
-          value={code}
-          placeholder="Enter your verification code"
-          placeholderTextColor="#666666"
-          onChangeText={(code) => setCode(code)}
-          keyboardType="numeric"
-        />
-        {errors.fields.code && (
-          <Text style={styles.error}>{errors.fields.code.message}</Text>
-        )}
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            fetchStatus === "fetching" && styles.buttonDisabled,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={handleVerify}
-          disabled={fetchStatus === "fetching"}
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1"
         >
-          <Text style={styles.buttonText}>Verify</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [
-            styles.secondaryButton,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => signUp.verifications.sendEmailCode()}
-        >
-          <Text style={styles.secondaryButtonText}>I need a new code</Text>
-        </Pressable>
-      </View>
+          <View className="flex-1 px-6">
+            <View className="flex-1 justify-center">
+              {/* Logo/Branding */}
+              <View className="items-center mb-8">
+                <View className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl items-center justify-center mb-4 shadow-lg">
+                  <Ionicons name="mail" size={40} color="white" />
+                </View>
+                <Text className="text-3xl font-bold text-gray-900 mb-2">
+                  Check your Email
+                </Text>
+                <Text className="text-lg text-gray-600 text-center">
+                  We've sent a verification code to{"\n"}
+                  {signUp.emailAddress}
+                </Text>
+              </View>
+
+              {/* Verification form */}
+              <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+                <Text className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                  Enter Verification Code
+                </Text>
+
+                {/* Code Input */}
+                <View className="mb-6">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">
+                    Verification Code
+                  </Text>
+                  <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-1 border border-gray-200">
+                    <Ionicons name="key-outline" size={20} color="#6B7280" />
+                    <TextInput
+                      value={code}
+                      placeholder="Enter 6-digi code"
+                      placeholderTextColor="#9CA3AF"
+                      onChangeText={setCode}
+                      className="flex-1 ml-3 text-gray-900 text-center text-lg tracking-wide"
+                      // onChange={(code) => setCode(code.nativeEvent.text)}
+                      keyboardType="number-pad"
+                      maxLength={6}
+                      editable={fetchStatus !== "fetching"}
+                    />
+                  </View>
+                </View>
+
+                {/* Verify Button */}
+                <TouchableOpacity
+                  onPress={handleVerify}
+                  disabled={fetchStatus === "fetching"}
+                  className={`rounded-xl py-4 shadow-sm mb-4 ${fetchStatus === "fetching" ? "bg-gray-400" : "bg-green-600"}`}
+                  activeOpacity={0.8}
+                >
+                  <View className="flex-row items-center justify-center ">
+                    {fetchStatus === "fetching" ? (
+                      <Ionicons name="refresh" size={20} color="white" />
+                    ) : (
+                      <Ionicons
+                        name="checkmark-circle-outline"
+                        size={20}
+                        color="white"
+                      />
+                    )}
+                    <Text className="text-white font-semibold text-lg ml-2">
+                      {fetchStatus === "fetching"
+                        ? "Verifying..."
+                        : "Verify Account"}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                {/* Resend code */}
+                <TouchableOpacity
+                  onPress={() => signUp.verifications.sendEmailCode()}
+                  className="flex-row items-center justify-center"
+                >
+                  <Text className="text-blue-500 font-medium text-lg">
+                    Didn't receive the code? Resend
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            {/* Footer */}
+            <View className="pb-6">
+              <Text className="text-center text-gray-500 text-sm">
+                Almost there! Just one more step
+              </Text>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1">
-      <Text style={styles.title}>Sign up</Text>
-      <Text style={styles.label}>Email address</Text>
-      <TextInput
-        style={styles.input}
-        autoCapitalize="none"
-        value={emailAddress}
-        placeholder="Enter email"
-        placeholderTextColor="#666666"
-        onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
-        keyboardType="email-address"
-      />
-      {errors.fields.emailAddress && (
-        <Text style={styles.error}>{errors.fields.emailAddress.message}</Text>
-      )}
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        style={styles.input}
-        value={password}
-        placeholder="Enter password"
-        placeholderTextColor="#666666"
-        secureTextEntry={true}
-        onChangeText={(password) => setPassword(password)}
-      />
-      {errors.fields.password && (
-        <Text style={styles.error}>{errors.fields.password.message}</Text>
-      )}
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          (!emailAddress || !password || fetchStatus === "fetching") &&
-            styles.buttonDisabled,
-          pressed && styles.buttonPressed,
-        ]}
-        onPress={handleSubmit}
-        disabled={!emailAddress || !password || fetchStatus === "fetching"}
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
       >
-        <Text style={styles.buttonText}>Sign up</Text>
-      </Pressable>
-      {/* For your debugging purposes. You can just console.log errors, but we put them in the UI for convenience */}
-      {errors && (
-        <Text style={styles.debug}>{JSON.stringify(errors, null, 2)}</Text>
-      )}
+        <View className="flex-1 px-6">
+          {/* Main */}
+          <View className="flex-1 justify-center">
+            {/* Logo/Branding */}
+            <View className="items-center mb-8">
+              <View className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl items-center justify-center mb-4 shadow-lg">
+                <Ionicons name="fitness" size={40} color="white" />
+              </View>
+              <Text className="text-3xl font-bold text-gray-900 mb-2">
+                Join FitTracker
+              </Text>
+              <Text className="text-lg text-gray-600 text-center">
+                Track your fitness journey{"\n"} and reach your goals
+              </Text>
+            </View>
 
-      <View style={styles.linkContainer}>
-        <Text>Already have an account? </Text>
-        <Link href="/sign-in">
-          <Text>Sign in</Text>
-        </Link>
-      </View>
+            {/* Sign up form */}
+            <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+              <Text className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Create your account
+              </Text>
 
-      {/* Required for sign-up flows. Clerk's bot sign-up protection is enabled by default */}
-      <View nativeID="clerk-captcha" />
+              {/* Email Input */}
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View className="mb-4 flex flex-col gap-2">
+                    <Text style={styles.label}>Email</Text>
+                    <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200">
+                      <Ionicons name="mail-outline" size={20} color="#5B7280" />
+                      <TextInput
+                        autoCapitalize="none"
+                        value={value}
+                        placeholder="Enter your email"
+                        placeholderTextColor="#9CA3AF"
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        className="flex-1 ml-3 text-gray-900"
+                        editable={!isSubmitting}
+                        inputMode="email"
+                      />
+                    </View>
+                    {formErrors.email && (
+                      <Text style={styles.error}>
+                        {formErrors.email.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+
+              {/* Password Input */}
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View className="mb-6 flex flex-col gap-2">
+                    <Text style={styles.label}>Password</Text>
+                    <View className="flex flex-col gap-1">
+                      <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200">
+                        <Ionicons
+                          name="lock-closed-outline"
+                          size={20}
+                          color="#5B7280"
+                        />
+                        <TextInput
+                          autoCapitalize="none"
+                          value={value}
+                          placeholder="Enter your password"
+                          placeholderTextColor="#9CA3AF"
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          className="flex-1 ml-3 text-gray-900"
+                          editable={!isSubmitting}
+                          secureTextEntry={true}
+                          inputMode="text"
+                        />
+                      </View>
+                      <Text className="text-xs text-gray-500">
+                        Must be at least 8 characters
+                      </Text>
+                    </View>
+                    {formErrors.password && (
+                      <Text style={styles.error}>
+                        {formErrors.password.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+
+              {/* Sign in button */}
+              <TouchableOpacity
+                onPress={handleSubmit(onSubmit)}
+                disabled={isSubmitting}
+                className={`rounded-xl py-4 shadow-sm mb-4 ${isSubmitting ? "bg-gray-400" : "bg-blue-600"}`}
+                activeOpacity={0.8}
+              >
+                <View className="flex-row items-center justify-center">
+                  {isSubmitting ? (
+                    <Ionicons name="refresh" size={20} color="white" />
+                  ) : (
+                    <Ionicons
+                      name="person-add-outline"
+                      size={20}
+                      color="white"
+                    />
+                  )}
+                  <Text className="text-white font-semibold text-lg ml-2">
+                    {isSubmitting ? "Creating Account..." : "Create Account"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* Terms */}
+              <Text className="text-xs text-gray-500 text-center mb-4">
+                By creating an account, you agree to our Terms and Privacy
+                Policy.
+              </Text>
+            </View>
+
+            {/* Sign in link */}
+            <View className="flex-row justify-center items-center">
+              <Text className="text-gray-600">Already have an account? </Text>
+              <Link href="/sign-in" asChild>
+                <TouchableOpacity>
+                  <Text className="text-blue-600 font-semibold">Sign in</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+          </View>
+          {/* Footer */}
+          <View className="pb-6">
+            <Text className="text-center text-gray-500 text-sm">
+              Ready to transform your fitness?
+            </Text>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
