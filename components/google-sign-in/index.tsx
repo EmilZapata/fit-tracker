@@ -4,7 +4,7 @@ import * as AuthSession from "expo-auth-session";
 import { useRouter, type Href } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useEffect } from "react";
-import { Platform, Text, TouchableOpacity, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 
 // Preloads the browser for Android devices to reduce authentication load time
 // See: https://docs.expo.dev/guides/authentication/#improving-user-experience
@@ -69,10 +69,9 @@ export default function GoogleSignIn() {
   }, []);
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
       className="bg-white border-2 border-gray-200 rounded-xl py-4 shadow-sm"
-      activeOpacity={0.8}
     >
       <View className="flex-row items-center justify-center">
         <Ionicons name="logo-google" size={20} color="#EA4335" />
@@ -80,6 +79,6 @@ export default function GoogleSignIn() {
           Continue with Google
         </Text>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }

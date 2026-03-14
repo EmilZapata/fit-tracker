@@ -6,16 +6,16 @@ import { useAuth, useSignUp } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Href, Link, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -44,9 +44,20 @@ export default function Page() {
       emailAddress: data.email,
       password: data.password,
     });
-    console.log("🚀 ~ onSubmit ~ error:", error);
+
     if (error) {
+      const errorCode = (error as any)?.errors?.[0]?.code;
+
+      if (errorCode === "form_password_pwned") {
+        Alert.alert(
+          "Weak Password",
+          "The password you entered is too common. Please choose a more unique password.",
+          [{ text: "OK" }],
+        );
+      }
+
       console.error(JSON.stringify(error, null, 2));
+
       return;
     }
 
@@ -54,6 +65,14 @@ export default function Page() {
   };
 
   const handleVerify = async () => {
+    if (!code) {
+      Alert.alert(
+        "Error",
+        "Please enter the verification code sent to your email.",
+      );
+      return;
+    }
+
     const { error } = await signUp.verifications.verifyEmailCode({
       code,
     });
@@ -79,7 +98,6 @@ export default function Page() {
       });
     } else {
       const errorCode = (error as any)?.errors?.[0]?.code;
-      console.error("🚀 ~ handleVerify ~ errorCode:", errorCode);
       if (errorCode === "verification_expired") {
         await signUp.verifications.sendEmailCode();
 
@@ -105,12 +123,21 @@ export default function Page() {
         "There was an issue verifying your account. Please try again or contact support if the problem persists.",
         [{ text: "OK" }],
       );
+      console.log("🚀 ~ handleVerify ~ errorCode:", errorCode);
     }
   };
 
-  if (signUp.status === "complete" || isSignedIn) {
-    return null;
-  }
+  useEffect((): any => {
+    if (signUp.status === "complete" || isSignedIn) {
+      return;
+    }
+
+    return () => {
+      console.log("Resetting sign-up state");
+      signUp.reset();
+      signUp.finalize();
+    };
+  }, [signUp.status, isSignedIn]);
 
   if (
     signUp.status === "missing_requirements" &&
@@ -167,11 +194,10 @@ export default function Page() {
                 </View>
 
                 {/* Verify Button */}
-                <TouchableOpacity
+                <Pressable
                   onPress={handleVerify}
                   disabled={fetchStatus === "fetching"}
                   className={`rounded-xl py-4 shadow-sm mb-4 ${fetchStatus === "fetching" ? "bg-gray-400" : "bg-green-600"}`}
-                  activeOpacity={0.8}
                 >
                   <View className="flex-row items-center justify-center ">
                     {fetchStatus === "fetching" ? (
@@ -189,17 +215,17 @@ export default function Page() {
                         : "Verify Account"}
                     </Text>
                   </View>
-                </TouchableOpacity>
+                </Pressable>
 
                 {/* Resend code */}
-                <TouchableOpacity
+                <Pressable
                   onPress={() => signUp.verifications.sendEmailCode()}
                   className="flex-row items-center justify-center"
                 >
                   <Text className="text-blue-500 font-medium text-lg">
                     Didn't receive the code? Resend
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
             {/* Footer */}
@@ -313,11 +339,10 @@ export default function Page() {
               />
 
               {/* Sign in button */}
-              <TouchableOpacity
+              <Pressable
                 onPress={handleSubmit(onSubmit)}
                 disabled={isSubmitting}
                 className={`rounded-xl py-4 shadow-sm mb-4 ${isSubmitting ? "bg-gray-400" : "bg-blue-600"}`}
-                activeOpacity={0.8}
               >
                 <View className="flex-row items-center justify-center">
                   {isSubmitting ? (
@@ -333,7 +358,7 @@ export default function Page() {
                     {isSubmitting ? "Creating Account..." : "Create Account"}
                   </Text>
                 </View>
-              </TouchableOpacity>
+              </Pressable>
 
               {/* Terms */}
               <Text className="text-xs text-gray-500 text-center mb-4">
@@ -346,9 +371,9 @@ export default function Page() {
             <View className="flex-row justify-center items-center">
               <Text className="text-gray-600">Already have an account? </Text>
               <Link href="/sign-in" asChild>
-                <TouchableOpacity>
+                <Pressable>
                   <Text className="text-blue-600 font-semibold">Sign in</Text>
-                </TouchableOpacity>
+                </Pressable>
               </Link>
             </View>
           </View>

@@ -5,8 +5,6 @@ import { ActivityIndicator, View } from "react-native";
 
 export default function Layout() {
   const { isLoaded, userId, sessionId, getToken, isSignedIn } = useAuth();
-  console.log("🚀 ~ Layout ~ isLoaded:", isLoaded);
-  console.log("🚀 ~ Layout ~ isSignedIn:", isSignedIn);
 
   if (!isLoaded) {
     return (

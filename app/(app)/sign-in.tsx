@@ -11,7 +11,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -258,11 +257,10 @@ export default function Page() {
               )}
 
               {/* Sign in button */}
-              <TouchableOpacity
+              <Pressable
                 onPress={handleSubmit(onSubmit)}
                 disabled={isSubmitting}
                 className={`rounded-xl py-4 shadow-sm mb-4 ${isSubmitting ? "bg-gray-400" : "bg-blue-600"}`}
-                activeOpacity={0.8}
               >
                 <View className="flex-row items-center justify-center">
                   {isSubmitting ? (
@@ -274,7 +272,7 @@ export default function Page() {
                     {isSubmitting ? "Signing in..." : "Sign In"}
                   </Text>
                 </View>
-              </TouchableOpacity>
+              </Pressable>
 
               {/* For your debugging purposes. You can just console.log errors, but we put them in the UI for convenience */}
               {/* {errors && (
@@ -295,9 +293,9 @@ export default function Page() {
             <View className="flex-row justify-center items-center">
               <Text className="text-gray-600">Don't have an account? </Text>
               <Link href="/sign-up" asChild>
-                <TouchableOpacity>
+                <Pressable>
                   <Text className="text-blue-600 font-semibold">Sign up</Text>
-                </TouchableOpacity>
+                </Pressable>
               </Link>
             </View>
           </View>
