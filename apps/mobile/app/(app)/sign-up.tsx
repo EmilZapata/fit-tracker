@@ -1,7 +1,7 @@
 import {
   SignUpFormData,
   signUpSchema,
-} from "@/modules/auth/sign-up/toolbox/schemas";
+} from "@/features/auth/sign-up/toolbox/schemas";
 import { useAuth, useSignUp } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";

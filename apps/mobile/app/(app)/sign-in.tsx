@@ -19,7 +19,7 @@ import GoogleSignIn from "@/components/google-sign-in";
 import {
   signInSchema,
   type SignInFormData,
-} from "@/modules/auth/sign-in/toolbox/schemas";
+} from "@/features/auth/sign-in/toolbox/schemas";
 
 export default function Page() {
   const { signIn, errors, fetchStatus } = useSignIn();
