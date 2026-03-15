@@ -59,6 +59,7 @@ Library docs are cached in `docs/` — consult these FIRST before making Context
 - `docs/i18next.md` — i18next ^25.8.x + react-i18next ^16.5.x (useTranslation, plurals, namespaces, RN setup)
 - `docs/react-native-nitro-modules.md` — Nitro Modules ^0.35.0 (HybridObject, specs, Swift/Kotlin, codegen)
 - `docs/turborepo.md` — Turborepo monorepo setup, tasks, filtering, and workspace management
+- `docs/sanity.md` — Sanity v5 (schemas, defineType/defineField, GROQ, TypeGen, client, images)
 
 Only use Context7 MCP when the user explicitly asks to fetch updated documentation or when the local docs don't cover the needed topic.
 
