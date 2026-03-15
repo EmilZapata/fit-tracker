@@ -7,7 +7,7 @@ import { createImageUrlBuilder } from "@sanity/image-url";
 //Client safe config
 export const config = {
   projectId: "v90mk1xr",
-  dataset: "production",
+  dataset: "fit-tracker-dataset",
   apiVersion: "2024-01-01",
   useCdn: false,
 };

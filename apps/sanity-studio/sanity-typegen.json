@@ -1,6 +1,6 @@
 {
   "path": "../mobile/**/*.{ts,tsx,js,jsx}",
   "schema": "./schema.json",
-  "generates": "../mobile/core/libs/sanity-types/index.ts",
+  "generates": "../mobile/core/libs/sanity/types.ts",
   "overloadClientMethods": true
 }

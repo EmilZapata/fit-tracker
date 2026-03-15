@@ -1,7 +1,10 @@
+import ExerciseCard from "@/components/exercise-card";
+import { Exercise } from "@/core/libs/sanity-types";
+import { client } from "@/core/libs/sanity/client";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { defineQuery } from "groq";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   FlatList,
   Pressable,
@@ -13,19 +16,16 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const exercisesQuery = defineQuery(`*[_type == "exercise"]{
-  _id,
-  name,
-  description,
-  difficulty,
-  "imageUrl": image.asset->url,
-  videoUrl
+  ...
 }`);
 
 export default function Exercises() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [exercises, setExercises] = React.useState([]);
-  const [filteredExercises, setFilteredExercises] = React.useState([]);
+  const [exercises, setExercises] = React.useState<Exercise[]>([]);
+  const [filteredExercises, setFilteredExercises] = React.useState<Exercise[]>(
+    [],
+  );
   const [refreshing, setRefreshing] = React.useState(false);
 
   const fetchExercises = async () => {
@@ -44,6 +44,22 @@ export default function Exercises() {
     await fetchExercises();
     setRefreshing(false);
   }, []);
+
+  useEffect(() => {
+    fetchExercises();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredExercises(exercises);
+    } else {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      const filtered = exercises.filter((exercise) =>
+        exercise.name.toLowerCase().includes(lowerCaseQuery),
+      );
+      setFilteredExercises(filtered);
+    }
+  }, [searchQuery, exercises]);
 
   return (
     <SafeAreaView className="flex flex-1 bg-gray-50">
@@ -77,14 +93,14 @@ export default function Exercises() {
 
       {/* Exercise list */}
       <FlatList
-        data={[]}
+        data={filteredExercises}
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 16 }}
-        renderItem={(item) => (
+        renderItem={({ item }) => (
           <ExerciseCard
             item={item}
-            onPress={() => router.push(`/exercise-detail/${item.id}`)}
+            onPress={() => router.push(`/exercise-detail/${item._id}`)}
           />
         )}
         refreshControl={

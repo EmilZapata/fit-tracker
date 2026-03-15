@@ -208,3 +208,35 @@ export type AllSanitySchemaTypes =
   | SanityImageAsset
   | Geopoint
   | Slug;
+
+// Source: ../mobile/app/(app)/(tabs)/exercises.tsx
+// Variable: exercisesQuery
+// Query: *[_type == "exercise"]{  ...}
+export type ExercisesQueryResult = Array<{
+  _id: string;
+  _type: "exercise";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  description?: string;
+  difficulty?: "advanced" | "beginner" | "intermediate";
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  videoUrl?: string;
+  isActive?: boolean;
+}>;
+
+// Query TypeMap
+import "@sanity/client";
+declare module "@sanity/client" {
+  interface SanityQueries {
+    '*[_type == "exercise"]{\n  ...\n}': ExercisesQueryResult;
+  }
+}
