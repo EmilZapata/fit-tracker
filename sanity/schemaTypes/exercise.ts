@@ -11,6 +11,7 @@ export const exerciseType = defineType({
       media: 'image',
     },
   },
+  icon: () => '🏋️‍♂️',
   fields: [
     defineField({
       name: 'name',
@@ -40,6 +41,16 @@ export const exerciseType = defineType({
       name: 'image',
       title: 'Image',
       type: 'image',
+      options: {
+        hotspot: true,
+      },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt Text',
+          type: 'string',
+        }),
+      ],
     }),
     defineField({
       name: 'videoUrl',
