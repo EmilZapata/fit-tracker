@@ -10,7 +10,8 @@
     "deploy-graphql": "sanity graphql deploy",
     "dev": "sanity dev",
     "start": "sanity start",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "typegen": "sanity schema extract && sanity typegen generate"
   },
   "keywords": [
     "sanity"

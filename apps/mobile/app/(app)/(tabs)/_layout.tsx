@@ -20,6 +20,7 @@ export default function Layout() {
         name="exercises"
         options={{
           title: "Exercises",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="book" color={color} size={size} />
           ),
